@@ -19,3 +19,9 @@ We don't just take gaming seriously. We take Linux Gaming seriously.
 ## Release
 
 Release is yet to be announced.
+
+## Recent Change
+
+> 27/04/24
+
+Switched to using Fast API + NiceGUI
