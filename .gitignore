@@ -21,3 +21,11 @@
 go.work
 
 Spacefile
+
+.env
+
+bot/.env
+
+*/.env
+
+*.env
