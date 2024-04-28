@@ -1,13 +1,29 @@
 import discord
 from discord.ext import commands
+import aiohttp
 import requests
-import json
+from PIL import Image
+from io import BytesIO
 
 class FetchCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.ctx = None
         print("FetchCommand Cog initialized.")
+
+    async def fetch_image(self, url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                return await response.read()
+
+    def create_progress_bar(self, value):
+        """
+        Create a beautiful ASCII progress bar.
+        """
+        bar_length = 20
+        filled_length = int(bar_length * value)
+        bar = '█' * filled_length + '▒' * (bar_length - filled_length)
+        return f"[{value:.2f}/1] {bar}"
 
     @commands.slash_command(name="fetch", description="Fetch some information")
     async def fetch(self, ctx, name: str):
@@ -23,28 +39,60 @@ class FetchCommand(commands.Cog):
             print(f"User {self.ctx.author} has the 'Verified' role.")
             print(f"Received name input: {name}")
 
-            # Make the HTTP GET request using requests
+            # Defer the response to let Discord know the bot is processing
+            await self.ctx.defer()
+
+            # Make the HTTP GET request using aiohttp
             url = f"https://fruno-1-h7317751.deta.app/fetch?name={name}"
-            response = requests.get(url)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        print(f"Received response: {data}")
 
-            if response.status_code == 200:
-                data = response.json()
-                print(f"Received response: {data}")
-                # Defer the response to let Discord know the bot is processing
-                await self.ctx.defer()
+                        # Extract the relevant information from the JSON response
+                        game_name = data.get("name", "N/A")
+                        tier = data.get("protondb_data", {}).get("tier", "N/A")
+                        score = data.get("protondb_data", {}).get("score", 0.0)
+                        game_id = data.get("objectID", "N/A")
+                        header_image = data.get("proton_data", {}).get("header_image", "")
 
-                # Extract the header_image from the JSON response
-                header_image = data.get("proton_data", {}).get("header_image", "")
+                        # Fetch the header image and calculate the average color
+                        image_data = await self.fetch_image(header_image)
+                        image = Image.open(BytesIO(image_data))
+                        average_color = self.get_average_color(image)
 
-                # Create an embed to display the JSON object and the header image
-                embed = discord.Embed(title=f"Information for {name}", description=f"```json\n{json.dumps(data, indent=2)}\n```")
-                if header_image:
-                    embed.set_image(url=header_image)
+                        # Create an embed to display the information
+                        embed = discord.Embed(title="Game Information", color=average_color)
+                        embed.add_field(name="Name", value=game_name, inline=False)
+                        embed.add_field(name="Tier", value=tier, inline=False)
+                        embed.add_field(name="Score", value=self.create_progress_bar(score), inline=False)
+                        embed.add_field(name="Game ID", value=game_id, inline=False)
+                        if header_image:
+                            embed.set_image(url=header_image)
 
-                # Send the response using the saved ctx object
-                await self.ctx.respond(embed=embed)
-            else:
-                await self.ctx.respond(f"Error fetching information for {name}.")
+                        # Send the response using the saved ctx object
+                        await self.ctx.send(embed=embed)
+
+                        # Delete the loading message
+                        await self.ctx.interaction.delete_original_response()
+                    else:
+                        await self.ctx.send(f"Error fetching information for {name}.")
+                        await self.ctx.interaction.delete_original_response()
         else:
             print(f"User {self.ctx.author} does not have the 'Verified' role.")
-            await self.ctx.respond("You do not have the required role to use this command.")
+            await self.ctx.send("You do not have the required role to use this command.")
+            await self.ctx.interaction.delete_original_response()
+
+    def get_average_color(self, image):
+        """
+        Calculate the average color of an image.
+        """
+        pixels = image.getdata()
+        r, g, b = 0, 0, 0
+        for pixel in pixels:
+            r += pixel[0]
+            g += pixel[1]
+            b += pixel[2]
+        num_pixels = len(pixels)
+        return discord.Color.from_rgb(r // num_pixels, g // num_pixels, b // num_pixels)
