@@ -6,7 +6,6 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-
 def steamdb(number: str = ""):
     """
     Fetch data from SteamDB for a given game number.
@@ -65,62 +64,57 @@ async def index():
 
 @app.get("/fetch")
 async def fetch(name: str = ""):
-    print(f"Handling request to /fetch with name: {name}")
+    # Endpoint to fetch data from Algolia and Proton
+    payload = {
+        "query": "",
+        "attributesToHighlight": [],
+        "attributesToSnippet": [],
+        "facets": ["tags"],
+        "facetFilters": [["appType:Game"]],
+        "hitsPerPage": 50,
+        "attributesToRetrieve": ["lastUpdated", "name", "objectID", "followers", "oslist", "releaseYear", "tags", "technologies", "userScore"],
+        "page": 0
+    }
 
     if name:
-        payload = {
-            "query": "",
-            "attributesToHighlight": [],
-            "attributesToSnippet": [],
-            "facets": ["tags"],
-            "facetFilters": [["appType:Game"]],
-            "hitsPerPage": 50,
-            "attributesToRetrieve": ["lastUpdated", "name", "objectID", "followers", "oslist", "releaseYear", "tags", "technologies", "userScore"],
-            "page": 0
-        }
-
-        print("Updating payload with the provided name")
+        # Update payload with the provided name
         payload["query"] = name
         payload = json.dumps(payload)
 
-        print("Sending POST request to Algolia API")
+        # Send POST request to Algolia API
         response = requests.post("https://94he6yatei-dsn.algolia.net/1/indexes/steamdb/query?x-algolia-agent=Algolia for JavaScript (4.23.3); Browser", headers={"x-algolia-api-key": '9ba0e69fb2974316cdaec8f5f257088f', 'x-algolia-application-id': '94HE6YATEI', 'Referer': 'https://www.protondb.com'}, data=payload)
         response = response.json()
 
         if len(response['hits']) > 0:
-            print("Received response from Algolia API with at least one hit")
-            firstResult = response['hits'][0]
+            # Extract objectID from the first result
+            objectID = response['hits'][0]['objectID']
 
-            objectID = firstResult['objectID']
-            print(f"Extracted objectID: {objectID}")
-
-            print("Sending GET request to ProtonDB API")
-            url = f"https://www.protondb.com/api/v1/reports/summaries/{objectID}.json"
-            protondb_response = requests.get(url)
+            # Send GET request to ProtonDB API (reports)
+            protondb_url = f"https://www.protondb.com/api/v1/reports/summaries/{objectID}.json"
+            protondb_response = requests.get(protondb_url)
 
             if protondb_response.status_code == 200:
-                print("Received successful response from ProtonDB API")
+                # Extract relevant data from ProtonDB response
                 protondb_data = protondb_response.json()
-                extracted_data = {
-                    "confidence": protondb_data.get("confidence"),
-                    "score": protondb_data.get("score"),
-                    "total": protondb_data.get("total"),
-                    "tier": protondb_data.get("tier"),
-                    "name": firstResult.get("name"),
-                    "userScore": firstResult.get("userScore")
-                }
-                print("Extracted relevant data from ProtonDB response")
 
-                # Call the steamdb function to fetch data from SteamDB
-                steamdb_data = steamdb(objectID)
+            # Send GET request to ProtonDB API (proxy)
+            proton_url = f"https://www.protondb.com/proxy/steam/api/appdetails/?appids={objectID}"
+            proton_response = requests.get(proton_url)
 
-                return {"objectID": objectID, "protondb_data": extracted_data, "steamdb_data": steamdb_data}
-            else:
-                print(f"Failed to fetch data from ProtonDB for ObjectID: {objectID}")
-                return f"Failed to fetch data from ProtonDB for ObjectID: {objectID}"
+            if proton_response.status_code == 200:
+                # Extract the header_image from the ProtonDB proxy response
+                proton_data = {"header_image": proton_response.json()[str(objectID)]["data"]["header_image"]}
+
+            # Call the steamdb function to fetch data from SteamDB
+            steamdb_data = steamdb(objectID)
+
+            return {
+                "objectID": objectID,
+                "protondb_data": protondb_data,
+                "proton_data": proton_data,
+                "steamdb_data": steamdb_data
+            }
         else:
-            print(f"Could not find any results for: {name}")
             return f"Could not find any results for: {name}"
     else:
-        print("No name provided, returning a message")
         return "Please provide a name of a game to validate"
