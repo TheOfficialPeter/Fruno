@@ -51,11 +51,12 @@ class FetchCommand(commands.Cog):
                         print(f"Received response: {data}")
 
                         # Extract the relevant information from the JSON response
-                        game_name = data.get("name", "N/A")
-                        tier = data.get("protondb_data", {}).get("tier", "N/A")
-                        score = data.get("protondb_data", {}).get("score", 0.0)
-                        game_id = data.get("objectID", "N/A")
-                        header_image = data.get("proton_data", {}).get("header_image", "")
+                        data = data.get("data")
+                        game_name = data.get('name');
+                        tier = data.get('tier');
+                        score = data.get('score');
+                        game_id = data.get('objectId');
+                        header_image = data.get('image');
 
                         # Fetch the header image and calculate the average color
                         image_data = await self.fetch_image(header_image)
