@@ -22,6 +22,7 @@ Release is yet to be announced.
 
 ## Recent Change
 
-> 27/04/24
+> 04/05/24
 
-Switched to using Fast API + NiceGUI
+Switched to using BunJS + Hono. Hosted API on Cloudflare Workers.
+Planning on using DiscordJS + BunJS. Going to make this fast.
