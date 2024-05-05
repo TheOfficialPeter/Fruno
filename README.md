@@ -26,3 +26,8 @@ Release is yet to be announced.
 
 Switched to using BunJS + Hono. Hosted API on Cloudflare Workers.
 Planning on using DiscordJS + BunJS. Going to make this fast.
+
+
+> 05/05/24
+
+Not using SteamDB anymore ( gave up trying to scrape it + respect to the developers ). Using raw steam web API.
