@@ -5,7 +5,6 @@
 With the best features you can think of:
 - ProtonDB game compatibility verifier
 - Live game analytics
-- Game listings on BitSearch
 - Game benchmarks and requirements analyzers
 
 Features that are brainstormed ( planned ):

@@ -23,7 +23,7 @@ async function validate(gameName: string): Promise<[boolean, string, any, any]> 
     protonResponse = await protonResponse.json();
 
     if ( 'hits' in protonResponse && protonResponse['hits'].length > 0) {
-      var protonTierResponse = await fetch(`https://www.protondb.com/api/v1/reports/summaries/${ protonResponse['hits'][0]['objectID'] }.json`)
+      var protonTierResponse: any = await fetch(`https://www.protondb.com/api/v1/reports/summaries/${ protonResponse['hits'][0]['objectID'] }.json`)
       protonTierResponse = await protonTierResponse.json();
 
       return [true, 'Request to ProtonDB succeeded', protonResponse, protonTierResponse];
