@@ -5,7 +5,8 @@
   },
   "dependencies": {
     "hono": "^4.3.1",
-    "node-fetch": "^3.3.2"
+    "http": "^0.0.1-security",
+    "socks5-node-fetch": "^0.0.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",

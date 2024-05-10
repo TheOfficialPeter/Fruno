@@ -1,7 +1,11 @@
+// @ts-nocheck
+
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
+import { cors } from 'hono/cors'
 
 const app = new Hono()
+app.use('*', cors())
 
 async function validate(gameName: string): Promise<[boolean, string, any, any]> {
   if ( gameName != null && gameName != "" && gameName != " " ) {
@@ -20,11 +24,22 @@ async function validate(gameName: string): Promise<[boolean, string, any, any]> 
       return [false, 'Request to ProtonDB failed. Status did not return OK', null, null];
     }
 
-    protonResponse = await protonResponse.json();
+    try {
+      protonResponse = await protonResponse.json();
+    }
+    catch (err) {
+      return [false, 'Request to ProtonDB failed. Could not convert to JSON', null, null];
+    }
 
     if ( 'hits' in protonResponse && protonResponse['hits'].length > 0) {
       var protonTierResponse: any = await fetch(`https://www.protondb.com/api/v1/reports/summaries/${ protonResponse['hits'][0]['objectID'] }.json`)
-      protonTierResponse = await protonTierResponse.json();
+
+      try {
+        protonTierResponse = await protonTierResponse.json();
+      }
+      catch (err) {
+        return [false, 'Request to ProtonDB Game Info failed. Could not convert to JSON', null, null];
+      }
 
       return [true, 'Request to ProtonDB succeeded', protonResponse, protonTierResponse];
     }
@@ -40,48 +55,6 @@ async function validate(gameName: string): Promise<[boolean, string, any, any]> 
   else
   {
     return [false, 'Game name was not provided. Please try again', null, null];
-  }
-}
-
-async function steamAnalyics(previousResults: any): Promise<[boolean, string, any]> {
-  if ( previousResults['gameId'] != null && previousResults['gameId'] > 0 ) {
-    let steamResponse: any = await fetch(`https://store.steampowered.com/api/appdetails?appids=${previousResults['gameId']}`);
-    steamResponse = await steamResponse.json();
-    steamResponse = steamResponse[previousResults['gameId'].toString()]['data'];
-
-    if ( steamResponse['price_overview'] != null && steamResponse['price_overview']['final'] != null ) {
-      previousResults['price'] = steamResponse['price_overview']['final'];
-    }
-    else
-    {
-      previousResults['price'] = null;
-    }
-    
-    if ( steamResponse['movies'][0] != null && steamResponse['movies'][0]['mp4'] != null && steamResponse['movies'][0]['mp4']['480'] != null ) {
-      previousResults['trailer'] = steamResponse['movies'][0]['mp4']['480'];
-    }
-    else if ( steamResponse['movies'][0] != null && steamResponse['movies'][0]['mp4'] != null && steamResponse['movies'][0]['mp4']['max'] != null )
-    {
-      previousResults['trailer'] = steamResponse['movies'][0]['mp4']['max'];
-    }
-    else if ( steamResponse['movies'][0] != null && steamResponse['movies'][0]['webm'] != null && steamResponse['movies'][0]['webm']['480'] != null )
-    {
-      previousResults['trailer'] = steamResponse['movies'][0]['webm']['480'];
-    }
-    else if ( steamResponse['movies'][0] != null && steamResponse['movies'][0]['webm'] != null && steamResponse['movies'][0]['webm']['max'] != null )
-    {
-      previousResults['trailer'] = steamResponse['movies'][0]['webm']['max'];
-    }
-    else
-    {
-      previousResults['trailer'] = null;
-    }
-
-    return [true, "Steam Analyitcs request succeeded", previousResults]; 
-  }
-  else
-  {
-    return [false, "Please provide a valid game ID", null];
   }
 }
 
@@ -108,15 +81,7 @@ app.get('/fetch', async (c, next) => {
     [success, reason, results] = extractValues(results, tier);
 
     if ( success ) {
-      [success, reason, results] = await steamAnalyics(results);
-
-      if ( success ) {
-        return c.json(results);
-      }
-      else
-      {
-        return c.text(`Something went wrong when extracting values from Steam's API. Reason: ${reason}`, 500);
-      }
+      return c.json(results);
     }
     else
     {
