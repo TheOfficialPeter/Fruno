@@ -30,3 +30,7 @@ Planning on using DiscordJS + BunJS. Going to make this fast.
 > 05/05/24
 
 Not using SteamDB anymore ( gave up trying to scrape it + respect to the developers ). Using raw steam web API.
+
+> 11/05/24
+
+Switching to using Supabase Edge Functions (500K Monthly Free Tier) instead of using cloudflare (~300K Monthly Free Tier).

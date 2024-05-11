@@ -38,24 +38,33 @@ async function validate(gameName: string): Promise<[boolean, string, any, any]> 
     const protonResponseData = await protonResponse.json();
 
     if ('hits' in protonResponseData && protonResponseData['hits'].length > 0) {
-      const protonTierResponse = await fetch(`https://www.protondb.com/api/v1/reports/summaries/${protonResponseData['hits'][0]['objectID']}.json`);
-      const protonTierResponseData = await protonTierResponse.json();
-      return [true, 'Request to ProtonDB succeeded', protonResponseData, protonTierResponseData];
+      return [true, 'Request to ProtonDB succeeded', protonResponseData];
     } else if ('hits' in protonResponseData) {
       return [false, 'Game not found', null, null];
     } else {
-      return [false, 'It seems that ProtonDB might have changed their API. Please wait for an update', null, null];
+      returnprotonTierResponseDato [false, 'It seems that ProtonDB might have changed their API. Please wait for an update', null, null];
     }
   } catch (err) {
     return [false, 'Request to ProtonDB failed. Could not convert to JSON', null, null];
   }
 }
 
-function extractValues(protonResponse: any, protonTier: any): [boolean, string, any] {
-  if ( protonResponse != null && Object.keys(protonResponse).length > 0 && protonTier != null && Object.keys(protonTier).length > 0 ) {
+async function extractValues(protonResponse: any): Promise<[boolean, string, any]> {
+  if ( protonResponse != null && Object.keys(protonResponse).length > 0 ) {
     const firstGame = protonResponse['hits'][0];
 
-    return [true, "Values extracted successfully", {name: firstGame['name'], userScore: firstGame['userScore'], tier: protonTier['tier'], gameId: firstGame['objectID']} ];
+	const protonTierResponse = await fetch(`https://www.protondb.com/api/v1/reports/summaries/${firstGame['objectID'].toString()}.json`);
+	const protonTier = await protonTierResponse.json();
+
+
+	if ( protonTier != null && Object.keys(protonTier).length > 0 ){
+		return [true, "Values extracted successfully", {name: firstGame['name'], userScore: firstGame['userScore'], tier: protonTier['tier'], gameId: firstGame['objectID']} ];
+	}
+	else
+  	{
+		return [false, 'Could not fetch ProtonDB game tier info', null];
+	}
+
   }
   else
   {
@@ -103,7 +112,7 @@ app.get('/fetch', async (c, next) => {
     }
 
     // -- Extract
-    const [extractSuccess, extractReason, extractedValues] = extractValues(results, tier);
+    const [extractSuccess, extractReason, extractedValues] = await extractValues(results, tier);
 
     if (!extractSuccess) {
       return c.text(`Something went wrong when extracting values from ProtonDB. Reason: ${extractReason}`, 500);
