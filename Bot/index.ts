@@ -4,6 +4,8 @@ const path = require('node:path');
 import type { Interaction, Client as ClientType } from 'discord.js';
 import fs from 'fs';
 const tokenData = require('./config.json');
+const fetch = require('node-fetch');
+const cron = require('node-cron');
 
 const client = new Client({intents: [GatewayIntentBits.Guilds]});
 client.commands = new Collection();
@@ -52,6 +54,26 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
 client.once(Events.ClientReady, (c: ClientType) => {
     console.log(`Ready! Logged in as ${c.user?.tag}`);
+    
+    cron.schedule('*/10 * * * *', async () => {
+        try {
+            const response = await fetch('https://api.foxwire121.workers.dev');
+            if (!response.ok) {
+                const channel = client.channels.cache.get('1239591848415330357');
+                if (channel) {
+                    const warningEmbed = new client.discord.MessageEmbed()
+                        .setColor('#ff0000')
+                        .setTitle('API Offline Warning')
+                        .setDescription('The API is currently offline. Please wait for an update from the developers.')
+                        .addField('API Response', `\`\`\`${response}\`\`\``);
+                    
+                    channel.send({ embeds: [warningEmbed] });
+                }
+            }
+        } catch (error) {
+            console.error('Error checking API status:', error);
+        }
+    });
 });
 
 // Load Discord token from a JSON file instead of using process.env.DISCORD_TOKEN
