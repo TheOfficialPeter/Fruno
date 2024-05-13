@@ -1,6 +1,6 @@
-<h1 align=center>Fruno 1.0</h1>
+<h1 align=center>🚀 Fruno 1.0 🚀</h1>
 
-<p><b>Linux Gaming just got an upgrade.</b> Fruno is your new assisstant when it comes to Linux Gaming.</p>
+<p><b>Linux Gaming just got an upgrade.</b> Fruno is your new assistant when it comes to Linux Gaming.</p>
 
 With the best features you can think of:
 - ProtonDB game compatibility verifier
@@ -10,7 +10,7 @@ With the best features you can think of:
 Features that are brainstormed ( planned ):
 - Fruno API Documentation
 - Notifications and Webhooks
-- Game Deals, Promo's and Trends
+- Game Deals, Promos, and Trends
 - AI Game Recommendation System
 
 Suggestions are always welcome. 

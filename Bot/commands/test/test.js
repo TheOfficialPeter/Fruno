@@ -1,5 +1,5 @@
-const { EmbedBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,7 +15,7 @@ module.exports = {
 		),
 	async execute(interaction) {
 		const type = interaction.options.getString('type');
-		var response = '';
+		let response = '';
 
 		if (type === 'ping') {
 			response = await fetch('https://api.foxwire121.workers.dev');
@@ -27,46 +27,24 @@ module.exports = {
 			response = 'Invalid test type';
 		}
 
-		if (response === 'Invalid test type') {
-			var warningEmbed = new EmbedBuilder()
-				.setColor('#ff0000')
-				.setTitle(':x: Invalid Test Type')
-				.setDescription('The test type you have entered is invalid. Please try again with a valid test type.')
-				.setTimestamp()
-				.setFooter({ text: "~ Made by theofficialpeter" });
+		let warningEmbed = new EmbedBuilder()
+			.setColor('#ff0000')
+			.setTitle(response === 'Invalid test type' ? ':x: Invalid Test Type' : ':x: API Offline Warning')
+			.setDescription(response === 'Invalid test type' ? 'The test type you have entered is invalid. Please try again with a valid test type.' : 'The API is currently offline. Please wait for an update from the developers.')
+			.setTimestamp()
+			.setFooter({ text: "~ Made by theofficialpeter" });
+
+		if (response === '') {
+			warningEmbed.addFields({ name: 'API Response', value: ` \`\`\` ${await response.text()} \`\`\` ` },
+				{ name: "Urgency", value: "High" },
+				{ name: "Recommended Actions", value: "Wait for fix from developers" },
+				{ name: "ETA Fix", value: "3 Hours" });
 		}
-		else if (response === '') {
-			var warningEmbed = new EmbedBuilder()
-				.setColor('#ff0000')
-				.setTitle(':x: API Offline Warning')
-				.setDescription('The API is currently offline. Please wait for an update from the developers.')
-				.addFields({ name: 'API Response', value: ` \`\`\` ${await response.text()} \`\`\` ` },
-						{ name: "Urgency", value: "High" },
-						{ name: "Recommended Actions", value: "Wait for fix from developers"},
-						{ name: "ETA Fix", value: "3 Hours"})
-				.setTimestamp()
-				.setFooter({ text: "~ Made by theofficialpeter" });
-		}
-		else {
-			var warningEmbed = new EmbedBuilder()
-				.setColor('#ff0000')
-				.setTitle(':x: API Offline Warning')
-				.setDescription('The API is currently offline. Please wait for an update from the developers.')
-				.addFields({ name: 'API Response', value: ` \`\`\` ${await response.text()} \`\`\` ` },
-						{ name: "Urgency", value: "High" },
-						{ name: "Recommended Actions", value: "Wait for fix from developers"},
-						{ name: "ETA Fix", value: "3 Hours"})
-				.setTimestamp()
-				.setFooter({ text: "~ Made by theofficialpeter" });
-			interaction.reply({ embeds: [warningEmbed] });
-		}
-        
-		if (warningEmbed === '') {
+
+		if (response === 'Invalid test type' || response === '') {
 			interaction.channel.send({ embeds: [warningEmbed] });
-		}
-		else {
+		} else {
 			interaction.channel.send("Something went wrong. Please try again later.");
 		}
 	},
 };
-

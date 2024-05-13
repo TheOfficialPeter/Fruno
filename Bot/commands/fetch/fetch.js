@@ -11,16 +11,14 @@ module.exports = {
                 .setDescription('Enter the name of the game to fetch')),
 	async execute(interaction) {
         const msg = interaction.options.getString('name');
-        if (msg && msg != '') {
-            var response = await fetch(`https://api.foxwire121.workers.dev/fetch?name=${msg}`);
-            response = await response.json();
+        if (!msg) {
+            await interaction.reply('You didn\'t provide any input!');
+            return;
+        }
 
-            const gameInfo = {
-                name: response.name,
-                userScore: response.userScore,
-                tier: response.tier,
-                gameId: response.gameId,
-            };
+        try {
+            const response = await fetch(`https://api.foxwire121.workers.dev/fetch?name=${msg}`);
+            const gameInfo = await response.json();
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
@@ -40,8 +38,9 @@ module.exports = {
                 .setFooter({ text: 'Fetched using Fruno Bot', iconURL: 'https://github.com/theofficialpeter/fruno' });
                 
             await interaction.reply({ embeds: [embed] });
-        } else {
-            await interaction.reply('You didn\'t provide any input!');
+        } catch (error) {
+            console.error('Error fetching game information:', error);
+            await interaction.reply('There was an error while fetching the game information.');
         }
 	},
 };
