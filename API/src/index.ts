@@ -20,7 +20,7 @@ async function validateGame(gameName: string): Promise<[boolean, string, any, an
   if (response.ok) {
     response = await response.json();
     if (response['hits'].length > 0) {
-      return [true, 'Game Found', response['hits'][0].name, null];
+      return [true, 'Game Found', response['hits'][0].name, response];
     }
     else
     {
@@ -33,37 +33,44 @@ async function validateGame(gameName: string): Promise<[boolean, string, any, an
   }
 }
 
-function fetchBasicInfo() {
+async function fetchLinuxInfo(gameId: number): Promise<[boolean, string, any, any]> {
+  return await [false, "", null, null];
 }
 
-function fetchPlayerData() {
+function fetchPlayerData(gameId: number) {
   
 }
 
-function fetchPricingData() {
+function fetchPricingData(gameIdentifier: number | string) {
 
 }
 
-function fetchDownloadData() {
+function fetchDownloadData(gameIdentifier: number | string) {
 
 }
 
 app.get('/', (c) => {
-  return c.text('Welcome to the Fruno API')
+  return c.text('Welcome to the Fruno API. Endpoints are listed below.')
 })
 
 app.get('/fetch', async(c) => {
   const gameName = c.req.query('name');
   if (gameName != undefined) {
-    const validateResponse = await validateGame(gameName);
+    const [success, reason, name, gameResult] = await validateGame(gameName);
+    if (success) {
+      let gameName = name;
+      let gameId = gameResult['hits'][0]['objectID']; 
+      let userScore = gameResult['hits'][0]['userScore']; 
 
-    if (validateResponse[0]) {
-      return c.text(validateResponse[2] + " was found in the games list")
+
+
     }
     else
     {
-      return c.text(validateResponse[1]);
+      return c.text(reason);
     }
+
+
   }
   else
   {
