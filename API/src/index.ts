@@ -15,8 +15,6 @@ async function validateGame(gameName: string): Promise<[boolean, string, any, an
     body: JSON.stringify(payload)
   })
 
-  console.log(response);
-
   if (response.ok) {
     response = await response.json();
     if (response['hits'].length > 0) {
@@ -33,12 +31,39 @@ async function validateGame(gameName: string): Promise<[boolean, string, any, an
   }
 }
 
-async function fetchLinuxInfo(gameId: number): Promise<[boolean, string, any, any]> {
-  return await [false, "", null, null];
+async function fetchLinuxInfo(gameId: number): Promise<[boolean, string, any]> {
+  let response = await fetch(`https://www.protondb.com/api/v1/reports/summaries/${gameId.toString()}.json`);
+  
+  if (response.ok) {
+    let linuxGameData = await response.json();
+    return [true, "Successfully fetched linux game data", linuxGameData];
+  }
+  return [false, "", null];
 }
 
-function fetchPlayerData(gameId: number) {
+async function fetchMediaData(gameId: number): Promise<[boolean, string, any]> {
+  const headers = new Headers()
+  headers.set('Set-Cookie', "browserid=3557358018393846067")
+  headers.set('Set-Cookie', "steamCountry=BR|81a96a64893a3c88b2def9d41bd1c085")
+
+  let response = await fetch(`https://www.protondb.com/proxy/steam/api/appdetails/?appids=${gameId.toString}`, {headers: headers});
+  console.log(await response.text());
+
+  if (response.ok) {
+    let mediaData = await response.json();
+    return [true, "Successfully fetched game media data", mediaData];
+  }
+  return [false, "", null];
+}
+
+async function fetchPlayerData(gameId: number): Promise<[boolean, string, any]> {
+  let response = await fetch(`https://steamcharts.com/app/${gameId.toString()}/chart-data.json`)
   
+  if (response.ok) {
+    let playerData = await response.json();
+    return [true, "Successfully fetch game player data", playerData];
+  }
+  return [true, "", null];
 }
 
 function fetchPricingData(gameIdentifier: number | string) {
@@ -55,22 +80,60 @@ app.get('/', (c) => {
 
 app.get('/fetch', async(c) => {
   const gameName = c.req.query('name');
+  let gameInfoResult: any = {};
+
   if (gameName != undefined) {
-    const [success, reason, name, gameResult] = await validateGame(gameName);
-    if (success) {
-      let gameName = name;
-      let gameId = gameResult['hits'][0]['objectID']; 
-      let userScore = gameResult['hits'][0]['userScore']; 
-
-
-
+    var [validateSuccess, validateReason, validateName, validateGameResult] = await validateGame(gameName);
+    if (validateSuccess) {
+      var name = validateName;
+      var gameId = validateGameResult['hits'][0]['objectID']; 
+      var userScore = validateGameResult['hits'][0]['userScore']; 
     }
     else
     {
-      return c.text(reason);
+      return c.text(validateReason);
     }
 
+    gameInfoResult['name'] = name;
+    gameInfoResult['gameId'] = gameId;
+    gameInfoResult['userScore'] = userScore;
+    
+    let [linuxSuccess, linuxReason, linuxGameResult] = await fetchLinuxInfo(gameId);
 
+    if (linuxSuccess) {
+      let tier = linuxGameResult['tier'];
+      gameInfoResult['tier'] = tier;
+    }
+    else
+    {
+      return c.text(linuxReason);
+    }
+
+    var [mediaSuccess, mediaReason, mediaResult] = await fetchMediaData(gameId);
+
+    if (mediaSuccess) {
+      let headerImage = mediaResult[gameId]['data']['header_image'];
+      let trailer = mediaResult[gameId]['data']['movies'][0]['webm']['480'];
+      gameInfoResult['image'] = headerImage;
+      gameInfoResult['trailer'] = trailer;
+    }
+    else 
+    {
+      return c.text(mediaReason);
+    }
+
+    let [playerSuccess, playerReason, playerDataResult] = await fetchPlayerData(gameId);
+
+    if (playerSuccess) {
+      let currentlyPlaying = playerDataResult.at(-1)[1];
+      gameInfoResult['currentPlaying'] = currentlyPlaying;
+    }
+    else
+    {
+      return c.text(playerReason);
+    }
+
+    return c.json(gameInfoResult);
   }
   else
   {
