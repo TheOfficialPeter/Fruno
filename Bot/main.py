@@ -12,8 +12,8 @@ async def on_ready():
 
 # Function to load all cogs from the cogs directory
 def load_cogs(bot):
-    cogs_dir = './cogs'
-    for filename in os.listdir(cogs_dir):
+    cogs_dir = '/cogs'
+    for filename in os.listdir(os.path.dirname(__file__) + cogs_dir):
         if filename.endswith('.py') and filename != '__init__.py':
             extension = f'cogs.{filename[:-3]}'
             try:

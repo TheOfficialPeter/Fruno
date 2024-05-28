@@ -12,6 +12,7 @@ Features that are brainstormed ( planned ):
 - Notifications and Webhooks
 - Game Deals, Promos, and Trends
 - AI Game Recommendation System
+- Desktop/Mobile Application (Still unsure)
 
 Suggestions are always welcome. 
 
