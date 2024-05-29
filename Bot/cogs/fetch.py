@@ -16,9 +16,8 @@ class FetchCommand(commands.Cog):
             resp = requests.get(f"https://6651005cb09f1b83aa75.appwrite.global/fetch?name={game}", timeout=50)
 
             if resp.ok:
-                resp = resp.json()
-
                 try:
+                    resp = resp.json()
                     embed = Embed(
                         title="Game Information",
                         description=date.today(),
@@ -43,11 +42,14 @@ class FetchCommand(commands.Cog):
                             resp['desc'] = ' (Invalid ProtonDB tier)'
 
                     embed.add_field(name="Linux Compatibility Tier", value=resp['tier'] + resp['desc'], inline=False)
-                    embed.add_field(name="Linux Compatibility Tier Score", value=resp['tierScore'], inline=False)
+                    embed.add_field(name="Linux Compatibility Tier Score", value=resp['userScore'], inline=False)
+                    embed.add_field(name="Peak Player Count", value=str(resp['ccu']), inline=False)
+                    embed.add_field(name="Youtube Video Uploads Recently", value=str(resp['yt']), inline=False)
+                    embed.add_field(name="Current Price", value=str(resp['price']), inline=False)
                     embed.set_image(url=resp['image'])
 
                     await self.interaction.respond(embed=embed, view=ButtonRow())
-                except:
+                except Exception as e:
                     await self.interaction.respond("Game was found, but information could not be gathered correctly. Please try again later or wait for update")
             else:
                 await self.interaction.respond("Something went wrong with the API. Please try again later or wait for update")
