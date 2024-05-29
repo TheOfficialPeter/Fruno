@@ -19,3 +19,7 @@ Suggestions are always welcome.
 ## Release
 
 Release is yet to be announced.
+
+## Installation
+
+Will be revealed once complete
