@@ -13,7 +13,7 @@ class FetchCommand(commands.Cog):
         self.interaction = ctx
         
         if "Buyer" in [role.name for role in ctx.author.roles] and game != "":
-            resp = requests.get(f"https://6651005cb09f1b83aa75.appwrite.global/fetch?name={game}", timeout=50)
+            resp = requests.get(f"https://6651005cb09f1b83aa75.appwrite.global?name={game}", timeout=50)
 
             if resp.ok:
                 try:
