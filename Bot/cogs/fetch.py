@@ -5,16 +5,26 @@ import requests
 from functions.playerStats import *
 
 class ButtonRow(ui.View):
-    def __init__(self, gameId):
+    def __init__(self, gameId, title):
         super().__init__()
         self.gameId = gameId
+        self.title = title
 
     @ui.button(label="View Analytics", style=ButtonStyle.green, emoji="📈")
     async def analytics_callback(self, button, interaction):
-        data = fetchPlayerStats(self.gameId)
-        imageData = convertDataToImage(data)
+        result = fetchPlayerStats(self.gameId)
 
-        await interaction.response.send_message("Here is the gameId: " + self.gameId)
+        if result[0]:
+            embed = Embed(
+                title="Player Statistics for " + self.title or " [Unknown Title]",
+                description="Concurrent Players Playing the game in the past **48** hours",
+                color=Color.green()
+            )
+
+            result = convertDataToImage(result[2], embed)
+            await interaction.response.send_message(embed=result[0], file=result[1])
+        else:
+            await interaction.response.send_message(result[1])
 
     @ui.button(label="Recommendations", style=ButtonStyle.green, emoji="♻️")
     async def recommendation_callback(self, button, interaction):
@@ -34,12 +44,11 @@ class FetchCommand(commands.Cog):
 
     @commands.slash_command(name="fetch")
     async def fetch(self, ctx, game: str):
-        self.interaction = ctx
-        
+        await ctx.interaction.response.defer()
+
         if "Buyer" in [role.name for role in ctx.author.roles] and game != "":
             resp = requests.get(f"https://6651005cb09f1b83aa75.appwrite.global?name={game}", timeout=50)
             
-
             if resp.ok:
                 try:
                     resp = resp.json()
@@ -73,14 +82,14 @@ class FetchCommand(commands.Cog):
                     embed.add_field(name="Current Price", value=str(resp['price']), inline=False)
                     embed.set_image(url=resp['image'])
 
-                    await self.interaction.send(embed=embed, view=ButtonRow(resp['gameId']))
+                    await ctx.followup.send(embed=embed, view=ButtonRow(resp['gameId'], resp['title']))
                 except Exception as e:
                     print(e)
-                    await self.interaction.respond("Game was found, but information could not be gathered correctly. Please try again later or wait for update")
+                    await ctx.followup.send("Game was found, but information could not be gathered correctly. Please try again later or wait for update")
             else:
-                await self.interaction.respond("Something went wrong with the API. Please try again later or wait for update")
+                await ctx.followup.send("Something went wrong with the API. Please try again later or wait for update")
         else:
-            await self.interaction.respond("You do not have the required '@Buyer' role.")
+            await ctx.interaction.respond("You do not have the required '@Buyer' role.")
 
 def setup(bot):
     bot.add_cog(FetchCommand(bot))
