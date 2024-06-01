@@ -5,13 +5,16 @@ import requests
 from functions.playerStats import *
 
 class ButtonRow(ui.View):
-    def __init__(self, gameId, title):
+    def __init__(self, gameId, title, ctx):
         super().__init__()
+        self.ctx = ctx
         self.gameId = gameId
         self.title = title
 
     @ui.button(label="View Analytics", style=ButtonStyle.green, emoji="📈")
     async def analytics_callback(self, button, interaction):
+        await interaction.response.defer()
+
         result = fetchPlayerStats(self.gameId)
 
         if result[0]:
@@ -22,9 +25,9 @@ class ButtonRow(ui.View):
             )
 
             result = convertDataToImage(result[2], embed)
-            await interaction.response.send_message(embed=result[0], file=result[1])
+            await self.ctx.followup.send(embed=result[0], file=result[1])
         else:
-            await interaction.response.send_message(result[1])
+            await self.ctx.followup.send(result[1])
 
     @ui.button(label="Recommendations", style=ButtonStyle.green, emoji="♻️")
     async def recommendation_callback(self, button, interaction):
@@ -82,10 +85,9 @@ class FetchCommand(commands.Cog):
                     embed.add_field(name="Current Price", value=str(resp['price']), inline=False)
                     embed.set_image(url=resp['image'])
 
-                    await ctx.followup.send(embed=embed, view=ButtonRow(resp['gameId'], resp['title']))
+                    await ctx.followup.send(embed=embed, view=ButtonRow(resp['gameId'], resp['title'], ctx))
                 except Exception as e:
-                    print(e)
-                    await ctx.followup.send("Game was found, but information could not be gathered correctly. Please try again later or wait for update")
+                    await ctx.followup.send("Something went wrong: " + resp.text or e)
             else:
                 await ctx.followup.send("Something went wrong with the API. Please try again later or wait for update")
         else:
