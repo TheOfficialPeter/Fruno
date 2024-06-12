@@ -3,6 +3,7 @@ from discord import Embed, Color, ui, ButtonStyle
 from datetime import date
 import requests
 from functions.playerStats import *
+from functions.recommend import *
 
 class ButtonRow(ui.View):
     def __init__(self, gameId, title, ctx):
@@ -31,7 +32,13 @@ class ButtonRow(ui.View):
 
     @ui.button(label="Recommendations", style=ButtonStyle.green, emoji="♻️")
     async def recommendation_callback(self, button, interaction):
-        await interaction.response.send_message("You clicked the button!")
+        recommendedResponse = getRecommendedGames(self.title)
+
+        if recommendedResponse != "":
+            # use the recommended games string
+            await self.ctx.followup.send(recommendedResponse)
+        else:
+            await self.ctx.followup.send("Could not get recommended games")
 
     @ui.button(label="Installation", style=ButtonStyle.green, emoji="⚒️")
     async def installation_callback(self, button, interaction):
@@ -58,7 +65,6 @@ class FetchCommand(commands.Cog):
                     
                     embed = Embed(
                         title="Game Information",
-                        description=date.today(),
                         color=Color.green()
                     )
 
