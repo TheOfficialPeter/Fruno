@@ -9,14 +9,12 @@ def clean(answer):
     return answer
 
 def getRecommendedGames(gameName):
-    placeholder = "Please show a list of games that are closely similar to the one listed below. ONLY SHOW THE NAME OF THE GAMES"
-    prompt = placeholder + {gameName}
+    prompt = f"Please show a list of games that are closely similar to the `{gameName}`. ONLY SHOW THE LIST OF NAMES OF THE GAMES"
+    promptResponse = perplexity.search(prompt)
     
-    answer = perplexity.search(prompt)
-    
-    final = ""
-    for a in answer:
-        final = a.get('answer')
+    answerResponse = ""
+    for i in promptResponse:
+        answerResponse = i.get('answer')
 
-    final = clean(final)
-    return final
+    answerResponse = clean(answerResponse)
+    return answerResponse
