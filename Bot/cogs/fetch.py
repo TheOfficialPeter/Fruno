@@ -27,7 +27,7 @@ class ButtonRow(ui.View):
 
             result = convertDataToImage(result[2], embed)
              
-            if result is None:
+            if result:
                 await self.ctx.followup.send(embed=result[0], file=result[1])
             else:
                 await self.ctx.followup.send(f"There was a problem fetching the Player Analytics for {self.title}. Please report this and wait for an update from the developer. Sorry for the inconvenience")
