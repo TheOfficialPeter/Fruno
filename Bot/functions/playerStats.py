@@ -22,25 +22,43 @@ def fetchPlayerStats(gameId):
 
 def convertDataToImage(data, embed):
     if data and len(data) > 5:
-        data_stream = io.BytesIO()
+        try: 
+            data_stream = io.BytesIO()
 
-        time = list(map(lambda x: datetime.fromtimestamp(x[0]/1000).strftime("%H"), data))
-        players = list(map(lambda x: x[1], data))
+            time = list(map(lambda x: datetime.fromtimestamp(x[0]/1000).strftime("%H"), data))
+            players = list(map(lambda x: x[1], data))
 
-        plt.figure(figsize=(15,5))
-        plt.xlabel("Time")
-        plt.ylabel("Players")
-        plt.plot(time, players)
-        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
-        plt.close()
+            fig, ax = plt.subplots(figsize=(15,5))
 
-        data_stream.seek(0)
-        chart = File(data_stream, filename="player_stats.png")
+            # colors 
+            ax.set_facecolor('#23272A')
+            ax.tick_params(axis='x', colors='white')  # X-axis tick labels and ticks
+            ax.tick_params(axis='y', colors='white')  # Y-axis tick labels and ticks
+            ax.spines['bottom'].set_color('white')
+            ax.spines['top'].set_color('white')
+            ax.spines['left'].set_color('white')
+            ax.spines['right'].set_color('white')
+            ax.grid(color='gray', linestyle='--', linewidth=0.5)
+            fig.patch.set_facecolor('#23272A')
 
-        embed.set_image(
-            url="attachment://player_stats.png"
-        )
+            plt.xlabel("Time", color='lightgreen')
+            plt.ylabel("Players", color='lightgreen')
+            plt.plot(time, players, color='lightgreen')
+            plt.title("Player Statistics Over Time", color='lightgreen')
+            plt.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
+            plt.close()
 
-        return [embed, chart]
+            data_stream.seek(0)
+            chart = File(data_stream, filename="player_stats.png")
+
+            embed.set_image(
+                url="attachment://player_stats.png"
+            )
+            
+            return [embed, chart]
+        except Exception as e:
+            print("[Fruno Error]: Failed to generate graphs")
+            return [None, None]
+
     else:
         return [False, "Could not convert player stats data to image. Unexpected data input", None]
