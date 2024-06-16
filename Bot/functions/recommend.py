@@ -1,20 +1,27 @@
-import requests
-import re
-from perplexity import Perplexity
+import google.generativeai as genai
+from config import GEMINI_TOKEN
 
-perplexity = Perplexity()
+genai.configure(api_key=GEMINI_TOKEN)
 
-def clean(answer):
-    answer = re.sub(r"\[\d+\]", "", answer)
-    return answer
+# Create the model
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+  "response_mime_type": "text/plain",
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-1.5-flash",
+  generation_config=generation_config,
+)
 
 def getRecommendedGames(gameName):
-    prompt = f"Please show a list of games that are closely similar to the `{gameName}`. ONLY SHOW THE LIST OF NAMES OF THE GAMES"
-    promptResponse = perplexity.search(prompt)
+    # Create new chat session
+    chat_session = model.start_chat()
     
-    answerResponse = ""
-    for i in promptResponse:
-        answerResponse = i.get('answer')
-
-    answerResponse = clean(answerResponse)
-    return answerResponse
+    prompt = f"Please show a list of games that are closely similar to the `{gameName}`. ONLY SHOW THE LIST OF NAMES OF THE GAMES"
+    response = chat_session.send_message(prompt)
+    
+    return response.text
