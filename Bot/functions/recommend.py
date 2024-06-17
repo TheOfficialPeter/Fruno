@@ -17,7 +17,7 @@ model = genai.GenerativeModel(
   generation_config=generation_config,
 )
 
-def getRecommendedGames(gameName):
+def getRecommendedGames(gameName) -> str:
     # Create new gemini session
     chat_session = model.start_chat()
     
