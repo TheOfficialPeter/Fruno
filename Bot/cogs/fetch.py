@@ -4,6 +4,7 @@ from datetime import date
 import requests
 from functions.playerStats import *
 from functions.recommend import *
+from functions.installation import *
 
 class ButtonRow(ui.View):
     def __init__(self, gameId, title, ctx):
@@ -41,17 +42,31 @@ class ButtonRow(ui.View):
         recommendedResponse = getRecommendedGames(self.title)
 
         if recommendedResponse != "":
-            embed = Embed(
+            recommendedEmbed = Embed(
                 description=recommendedResponse,
                 color=Color.green()
             )
 
-            await self.ctx.followup.send(embed=embed)
+            await self.ctx.followup.send(embed=recommendedEmbed)
         else:
-            await self.ctx.followup.send(f"Could not fetch any games similar to {self.title}")
+            await self.ctx.followup.send(f"Could not fetch any games similar to {self.title}. Please try a different game or try again later. If this error still persists please notify the developer and wait for further updates.")
 
     @ui.button(label="Installation", style=ButtonStyle.green, emoji="⚒️")
     async def installation_callback(self, button, interaction):
+        await interaction.response.defer()
+        
+        instructions = getInstallationInstructions(self.title)
+
+        if instructions and instructions != "":
+            instructionsEmbed = Embed(
+                description=instructions,
+                color=Color.green()
+            )
+            
+            await self.ctx.followup.send(embed=instructionsEmbed)
+        else:
+            await self.ctx.followup.send(f"Could not fetch Purchase and Installation instructions for {self.title}. Please report this to the developer and await further updates.")
+        
         await interaction.response.send_message("You clicked the button!")  
 
     @ui.button(label="Downloads", style=ButtonStyle.green, emoji="⬇️")

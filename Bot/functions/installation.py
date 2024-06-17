@@ -17,11 +17,11 @@ model = genai.GenerativeModel(
   generation_config=generation_config,
 )
 
-def getRecommendedGames(gameName):
+def getInstallationInstructions(gameName) -> str:
     # Create new gemini session
     chat_session = model.start_chat()
     
-    prompt = f"Please show a list of games that are closely similar to the `{gameName}`. ONLY SHOW THE LIST OF NAMES OF THE GAMES"
+    prompt = f"Please show a list of game purchase and installation instructions for the following game: `{gameName}`. ONLY SHOW THE LIST OF INSTRUCTIONS IN BULLET FORM WITH THE APPROPRIATE SECTION HEADERS"
     response = chat_session.send_message(prompt)
     
     return response.text
