@@ -1,18 +1,20 @@
-<h1 align=center>🚀 Fruno 1.0 🚀</h1>
+<h1 align=center>🚀 Fruno 🚀</h1>
 
-<p><b>Linux Gaming just got an upgrade.</b> Fruno is your new assistant when it comes to Linux Gaming.</p>
+<p><b>a Decent Gaming Assistant Bot.</b> Previously primarily focused on the Linux gaming space, it is now centered around all your gaming needs.</p>
 
-With the best features you can think of:
-- ProtonDB game compatibility verifier
-- Live game analytics
-- Game benchmarks and requirements analyzers
+Some quality features:
+- Quick ProtonDB game compatibility checker for Linux gamers.
+- Game Installation and Purchasing Instructions.
+- **Notification** and **Alerts** on latest deals and promo codes.
+- Live Game Analytics.
+- Game benchmarks and Requirements Analyzers.
+- AI Game Recommendation System.
+- Personal Notification on your platform of choice.
 
-Features that are brainstormed ( planned ):
-- Fruno API Documentation
-- Notifications and Webhooks
-- Game Deals, Promos, and Trends
-- AI Game Recommendation System
-- Desktop/Mobile Application (Still unsure)
+Features that are planned:
+- Fruno API Documentation for Developers.
+- Self-Hostable
+- Integrates with other platforms or bots
 
 Suggestions are always welcome. 
 
