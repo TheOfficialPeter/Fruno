@@ -5,6 +5,7 @@ import requests
 from functions.playerStats import *
 from functions.recommend import *
 from functions.installation import *
+from enums.enums import Role
 
 class ButtonRow(ui.View):
     def __init__(self, gameId, title, ctx):
@@ -81,7 +82,7 @@ class FetchCommand(commands.Cog):
     async def fetch(self, ctx, game: str):
         await ctx.interaction.response.defer()
 
-        if "Buyer" in [role.name for role in ctx.author.roles] and game != "":
+        if Role.BUYER.value in [role.name for role in ctx.author.roles] and game != "":
             resp = requests.get(f"https://6651005cb09f1b83aa75.appwrite.global?name={game}", timeout=50)
             
             if resp.ok:
@@ -123,7 +124,7 @@ class FetchCommand(commands.Cog):
             else:
                 await ctx.followup.send("Something went wrong with the API. Please try again later or wait for update")
         else:
-            await ctx.interaction.respond("You do not have the required '@Buyer' role.")
+            await ctx.interaction.respond("You do not have the required 'Buyer' role.")
 
 def setup(bot):
     bot.add_cog(FetchCommand(bot))
