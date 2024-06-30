@@ -1,10 +1,8 @@
 from discord.ext import commands
 from discord import Embed, Color, ui, ButtonStyle, EmbedMedia
-from datetime import date
 import requests
-from functions.playerStats import *
-from functions.recommend import *
-from functions.installation import *
+from config import API_URI
+from extra.playerStats import *
 from enums.enums import Role
 
 class ButtonRow(ui.View):
@@ -36,44 +34,6 @@ class ButtonRow(ui.View):
         else:
             await self.ctx.followup.send(result[1])
 
-    @ui.button(label="Recommendations", style=ButtonStyle.green, emoji="♻️")
-    async def recommendation_callback(self, button, interaction):
-        await interaction.response.defer()
-
-        recommendedResponse = getRecommendedGames(self.title)
-
-        if recommendedResponse != "":
-            recommendedEmbed = Embed(
-                description=recommendedResponse,
-                color=Color.green()
-            )
-
-            await self.ctx.followup.send(embed=recommendedEmbed)
-        else:
-            await self.ctx.followup.send(f"Could not fetch any games similar to {self.title}. Please try a different game or try again later. If this error still persists please notify the developer and wait for further updates.")
-
-    @ui.button(label="Installation", style=ButtonStyle.green, emoji="⚒️")
-    async def installation_callback(self, button, interaction):
-        await interaction.response.defer()
-        
-        instructions = getInstallationInstructions(self.title)
-
-        if instructions and instructions != "":
-            instructionsEmbed = Embed(
-                description=instructions,
-                color=Color.green()
-            )
-            
-            await self.ctx.followup.send(embed=instructionsEmbed)
-        else:
-            await self.ctx.followup.send(f"Could not fetch Purchase and Installation instructions for {self.title}. Please report this to the developer and await further updates.")
-        
-        await interaction.response.send_message("You clicked the button!")  
-
-    @ui.button(label="Downloads", style=ButtonStyle.green, emoji="⬇️")
-    async def downloads_callback(self, button, interaction):
-        await interaction.response.send_message("You clicked the button!")
-
 class FetchCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -83,7 +43,7 @@ class FetchCommand(commands.Cog):
         await ctx.interaction.response.defer()
 
         if Role.BUYER.value in [role.name for role in ctx.author.roles] and game != "":
-            resp = requests.get(f"https://6651005cb09f1b83aa75.appwrite.global?name={game}", timeout=50)
+            resp = requests.get(API_URI + game, timeout=50)
             
             if resp.ok:
                 try:
@@ -110,7 +70,7 @@ class FetchCommand(commands.Cog):
                         case "borked":
                             resp['desc'] = ' (Game is completely broken and unplayable on Linux with Proton)'
                         case _:
-                            resp['desc'] = ' (Invalid ProtonDB tier)'
+                            resp['desc'] = ' (Invalid ProtonDB tier. Linux game compatibility is unknown)'
 
                     embed.add_field(name="Linux Compatibility Tier", value=resp['tier'] + resp['desc'], inline=False)
                     embed.add_field(name="Peak Player Count", value=str(resp['ccu']), inline=False)

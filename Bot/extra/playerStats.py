@@ -3,10 +3,11 @@ from discord import File
 from datetime import datetime
 import io
 import matplotlib.pyplot as plt
+from config import ANALYTICS_API_URI
 
 def fetchPlayerStats(gameId):
     if gameId != "":
-        resp = requests.get(f"https://6658c2a589ac905ba57f.appwrite.global/?id={gameId}")
+        resp = requests.get(ANALYTICS_API_URI + gameId)
 
         if resp.ok:
             try:
@@ -25,7 +26,7 @@ def convertDataToImage(data, embed):
         try: 
             data_stream = io.BytesIO()
 
-            time = list(map(lambda x: datetime.fromtimestamp(x[0]/1000).strftime("%H"), data))
+            time = list(map(lambda x: datetime.utcfromtimestamp(x[0]/1000).strftime("%H"), data))
             players = list(map(lambda x: x[1], data))
 
             fig, ax = plt.subplots(figsize=(15,5))
