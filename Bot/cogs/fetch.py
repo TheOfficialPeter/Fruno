@@ -6,6 +6,11 @@ from config import API_URI
 from enums.enums import Role
 from views.gameResultOptions import OptionsRow
 
+"""
+File Info:
+File contains setup for the 'fetch' command which is used to fetch game analytics and information
+"""
+
 class FetchCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -50,7 +55,7 @@ class FetchCommand(commands.Cog):
                     embed.add_field(name="Current Price", value=str(resp['price']), inline=False)
                     embed.set_image(url=resp['image'])
 
-                    await ctx.followup.send(embed=embed, view=ButtonRow(resp['gameId'], resp['title'], ctx))
+                    await ctx.followup.send(embed=embed, view=OptionsRow(resp['gameId'], resp['title'], ctx))
                 except Exception as e:
                     await ctx.followup.send("Something went wrong: " + resp.text or e)
             else:

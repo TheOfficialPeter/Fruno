@@ -18,6 +18,10 @@ Features that are planned:
 
 Suggestions are always welcome. 
 
+## Track progress
+
+Occasionally I would add items to the "Projects" section of the github repo which also forms part of my planning and brainstorming. You should have a look there if you are more interested in the development of this project.
+
 ## Release
 
 Release is yet to be announced.

@@ -1,14 +1,91 @@
 import discord
+from discord import Embed, Color
+from extra.playerStats import *
+from extra.twitchStats import *
 
 class AnalyticsSelectMenu(discord.ui.View):
-    def __init__(self, options):
-        self.options = options
+    """
+    Analytics Menu Class to show different types of statistics pages for specified games.
+    Provide information to build the select menu and functionality for the Analytics Select Menu component.
+    Easy to implement into the rest of the codebase.
 
-        @discord.ui.select( # the decorator that lets you specify the properties of the select menu
-            placeholder = "Choose a Flavor!", # the placeholder text that will be displayed if nothing is selected
-            min_values = 1, # the minimum number of values that must be selected by the users
-            max_values = 1, # the maximum number of values that can be selected by the users
-            options = [discord.SelectOption(label=option.title, description=option.description) for option in self.options] # the list of options from which users can choose, a required field
+    Optional keyword arguments:
+    title: Describe the title label for the select menu
+    options: Dictionary containing Key and Value params for describing each option in the select menu.
+    return: Returns the selected item from the select menu for further processing.
+    """ 
+
+    def __init__(self, ctx, title):
+        self.ctx = ctx
+        self.title = title
+
+        @discord.ui.select(
+            placeholder = self.title,
+            min_values = 1,
+            max_values = 1,
+            options = [
+                discord.SelectOption(
+                    label="Player Analytics (2 days)",
+                    description="Get Concurrent Playing on this game for the past 48 hours",
+                    value="player"
+                ),
+                discord.SelectOption(
+                    label="Twitch Analytics",
+                    description="Fetches the latest twitch streaming analytics for this specific game",
+                    value="twitch"
+                ),
+                discord.SelectOption(
+                    label="Pricing Analytics",
+                    description="Fetches the pricing analytics over the course of time for easy comparison",
+                    value="price"
+                )
+            ]
         )
-        async def select_callback(self, select, interaction): # the function called when the user is done selecting options
-            await interaction.response.send_message(f"Awesome! I like {select.values[0]} too!")
+
+        async def analytics_select_menu_callback(self, select, interaction):
+            match(select.values[0]):
+                # Fetch Player Analytics
+                case "player":
+                    result = fetchPlayerStats(self.gameId)
+
+                    if result[0]:
+                        embed = Embed(
+                            title="Player Statistics for " + self.title or " **[Unknown Title]**",
+                            description="Concurrent Players Playing the game in the past **48** hours",
+                            color=Color.green()
+                        )
+
+                        result = convertDataToImage_Player(result[2], embed)
+                        
+                        if result:
+                            await self.ctx.followup.send(embed=result[0], file=result[1])
+                        else:
+                            await self.ctx.followup.send(f"There was a problem fetching the Player Analytics for {self.title}. Please report this and wait for an update from the developer. Sorry for the inconvenience")
+                    else:
+                        await self.ctx.followup.send(result[1])
+                            
+                # Fetch Twitch Analytics
+                case "twitch":
+                    result = fetchTwitchStats(self.gameId)
+                    
+                    if result[0]:
+                        embed = Embed(
+                            title="Twitch Viewer Statistics for " + self.title or " **[Unknown Title]**",
+                            description="Twitch Viewers watching the game in the past **48** hours",
+                            color=Color.green()
+                        )
+
+                        result = convertDataToImage_Twitch(result[2], embed)
+                        
+                        if result:
+                            await self.ctx.followup.send(embed=result[0], file=result[1])
+                        else:
+                            await self.ctx.followup.send(f"There was a problem fetching the Twitch Analytics for {self.title}. Please report this and wait for an update from the developer. Sorry for the inconvenience")
+                    else:
+                        await self.ctx.followup.send(result[1])
+
+                # Fetch Pricing Analytics
+                case "price":
+                    pass
+
+            return select.values[0]

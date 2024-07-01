@@ -2,6 +2,11 @@ from discord.ext import commands
 from discord import Embed, Colour
 from datetime import datetime
 
+"""
+File Info:
+File contains setup for the 'info' command which is used to fetch general bot information and guides
+"""
+
 class InfoCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

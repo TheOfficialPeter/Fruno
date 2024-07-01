@@ -7,39 +7,38 @@ from config import ANALYTICS_API_URI
 
 """
 File Info:
-File contains functions to fetch and process player analytics fetched from the backend
+File contains functions to fetch and process twitch analytics fetched from the backend
 """
 
-def fetchPlayerStats(gameId):
+def fetchTwitchStats(gameId):
     if gameId != "":
-        resp = requests.get(f"{ANALYTICS_API_URI+gameId}&type=player")
+        resp = requests.get(f"{ANALYTICS_API_URI+gameId}&type=twitch")
 
         if resp.ok:
             try:
                 stats = resp.json()
-                return [True, "Successfully fetched game player stats", stats]
+                return [True, "Successfully fetched game twitch stats", stats]
             except:
-                return [False, "Could not fetch game player stats. Response body invalid", None]
+                return [False, "Could not fetch game twitch stats. Response body invalid", None]
 
         else:
-            return [False, "Could not fetch game player stats. Request unsuccessful", None]
+            return [False, "Could not fetch game twitch stats. Request unsuccessful", None]
     else:
-        return [False, "Could not fetch game player stats. Game ID not provided", None]
+        return [False, "Could not fetch game twitch stats. Game ID not provided", None]
 
-def convertDataToImage_Player(data, embed):
+def convertDataToImage_Twitch(data, embed):
     if data and len(data) > 5:
         try: 
             data_stream = io.BytesIO()
 
             time = list(map(lambda x: datetime.utcfromtimestamp(x[0]/1000).strftime("%H"), data))
-            players = list(map(lambda x: x[1], data))
+            viewers = list(map(lambda x: x[1], data))
 
             fig, ax = plt.subplots(figsize=(15,5))
 
-            # colors 
             ax.set_facecolor('#23272A')
-            ax.tick_params(axis='x', colors='white')  # X-axis tick labels and ticks
-            ax.tick_params(axis='y', colors='white')  # Y-axis tick labels and ticks
+            ax.tick_params(axis='x', colors='white')
+            ax.tick_params(axis='y', colors='white')
             ax.spines['bottom'].set_color('white')
             ax.spines['top'].set_color('white')
             ax.spines['left'].set_color('white')
@@ -48,17 +47,17 @@ def convertDataToImage_Player(data, embed):
             fig.patch.set_facecolor('#23272A')
 
             plt.xlabel("Time", color='lightgreen')
-            plt.ylabel("Players", color='lightgreen')
-            plt.plot(time, players, color='lightgreen')
-            plt.title("Player Statistics Over Time", color='lightgreen')
+            plt.ylabel("Viewers", color='lightgreen')
+            plt.plot(time, viewers, color='lightgreen')
+            plt.title("Twitch Viewer Statistics Over Time", color='lightgreen')
             plt.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
             plt.close()
 
             data_stream.seek(0)
-            chart = File(data_stream, filename="player_stats.png")
+            chart = File(data_stream, filename="twitch_stats.png")
 
             embed.set_image(
-                url="attachment://player_stats.png"
+                url="attachment://twitch_stats.png"
             )
             
             return [embed, chart]
@@ -67,4 +66,4 @@ def convertDataToImage_Player(data, embed):
             return [None, None]
 
     else:
-        return [False, "Could not convert player stats data to image. Unexpected data input", None]
+        return [False, "Could not convert twitch stats data to image. Unexpected data input", None]
