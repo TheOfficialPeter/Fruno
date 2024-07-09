@@ -1,6 +1,6 @@
 from discord.ext import commands
 from discord import Embed, Color
-import datetime
+from datetime import datetime
 import requests
 from config import API_URI
 from enums.enums import Role
@@ -57,7 +57,7 @@ class FetchCommand(commands.Cog):
 
                     await ctx.followup.send(embed=embed, view=OptionsRow(resp['gameId'], resp['title'], ctx))
                 except Exception as e:
-                    await ctx.followup.send("Something went wrong: " + resp.text or e)
+                    await ctx.followup.send("Something went wrong: " + e)
             else:
                 await ctx.followup.send("Something went wrong with the API. Please try again later or wait for update")
         else:

@@ -21,4 +21,4 @@ class OptionsRow(ui.View):
 
     @ui.button(label="View Analytics", style=ButtonStyle.green, emoji="📈")
     async def analytics_callback(self, button, interaction):
-        await interaction.response.defer()
+        await interaction.response.send_message("Pick the type of Analytics you would like to view:", view=AnalyticsSelectMenu(self.ctx, self.title, self.gameId))
