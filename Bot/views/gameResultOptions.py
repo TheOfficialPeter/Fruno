@@ -18,7 +18,13 @@ class OptionsRow(ui.View):
         self.ctx = ctx
         self.gameId = gameId
         self.title = title
-
+    
     @ui.button(label="View Analytics", style=ButtonStyle.green, emoji="📈")
     async def analytics_callback(self, button, interaction):
         await interaction.response.send_message("Pick the type of Analytics you would like to view:", view=AnalyticsSelectMenu(self.ctx, self.title, self.gameId))
+        
+    # Add some logic behind this and use Gemini to fetch the similar games
+    # along with reasons for similarity
+    @ui.button(label="View Similar Games", style=ButtonStyle.green, emoji="🔗")
+    async def analytics_callback(self, button, interaction):
+        await interaction.response.send_message("Displaying a list of games that are slighly similar to the one you fetched.")
