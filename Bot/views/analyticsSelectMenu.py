@@ -1,7 +1,6 @@
 import discord
 from discord import Embed, Color
 from extra.stats.playerStats import *
-from extra.stats.twitchStats import *
 
 """
 File Info:
@@ -37,11 +36,6 @@ class AnalyticsSelectMenu(discord.ui.View):
                 description="Get Concurrent Playing on this game for the past 48 hours",
                 value="player"
             ),
-            discord.SelectOption(
-                label="Twitch Analytics",
-                description="Fetches the latest Twitch Viewer Analytics for the game",
-                value="twitch"
-            ),
             # This option might be a paid plan. So put it outside at some point
             discord.SelectOption(
                 label="Pricing Analytics",
@@ -67,6 +61,8 @@ class AnalyticsSelectMenu(discord.ui.View):
                         color=Color.green()
                     )
 
+                    embed.set_footer(text="If you notice any sudden drops to 0, that would mean that the API was down at that point in time")
+
                     result = convert_data_to_image_player(result[2], embed)
                     
                     if result[0]:
@@ -76,28 +72,8 @@ class AnalyticsSelectMenu(discord.ui.View):
                 else:
                     await self.ctx.followup.send(result[1])
                         
-            # Fetch Twitch Analytics
-            case "twitch":
-                result = fetchTwitchStats(self.gameId)
-                
-                if result[0]:
-                    embed = Embed(
-                        title="Twitch Viewer Statistics for " + self.title or " **[Unknown Title]**",
-                        description="Twitch Viewers watching the game in the past **48** hours",
-                        color=Color.green()
-                    )
-
-                    result = convert_twitch_data_to_image(result[2], embed)
-                    
-                    if result[0]:
-                        await self.ctx.followup.send(embed=result[0], file=result[1])
-                    else:
-                        await self.ctx.followup.send(f"There was a problem fetching the Twitch Analytics for {self.title}. Please report this and wait for an update from the developer. Sorry for the inconvenience")
-                else:
-                    await self.ctx.followup.send(result[1])
-
             # Fetch Pricing Analytics
             case "price":
-                pass
+                await self.ctx.followup.send("Yep still working on this one. Should be out once I finish up my custom scraper")
 
         return select.values[0]
