@@ -86,6 +86,11 @@ def convert_twitch_data_to_image(twitch_data, embed):
 
             fig, ax = plt.subplots(figsize=(15, 5))
 
+            class HumanizeFormatter(ticker.Formatter):
+                def __call__(self, y, pos=None):
+                    return intcomma(int(y))
+
+            ax.yaxis.set_major_formatter(HumanizeFormatter())
             ax.set_facecolor('#23272A')
             ax.tick_params(axis='x', colors='white')
             ax.tick_params(axis='y', colors='white')
