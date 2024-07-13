@@ -1,7 +1,7 @@
 import discord
 from discord import Embed, Color
-from extra.playerStats import *
-from extra.twitchStats import *
+from extra.stats.playerStats import *
+from extra.stats.twitchStats import *
 
 """
 File Info:
@@ -9,18 +9,19 @@ File contains a View for a Discord Select Menu template which is currently used 
 """
 
 class AnalyticsSelectMenu(discord.ui.View):
-    """
-    Analytics Menu Class to show different types of statistics pages for specified games.
-    Provide information to build the select menu and functionality for the Analytics Select Menu component.
-    Easy to implement into the rest of the codebase.
-
-    Optional keyword arguments:
-    title: Describe the title label for the select menu
-    options: Dictionary containing Key and Value params for describing each option in the select menu.
-    return: Returns the selected item from the select menu for further processing.
-    """ 
 
     def __init__(self, ctx, title, gameId):
+        """
+        Initializes the AnalyticsSelectMenu class with the provided context, title, and gameId.
+
+        Parameters:
+            ctx (discord.Context): The context object for the menu.
+            title (str): The title label for the select menu.
+            gameId (str): The ID of the game.
+
+        Returns:
+            None
+        """
         super().__init__()
         self.title = title
         self.ctx = ctx
@@ -52,6 +53,7 @@ class AnalyticsSelectMenu(discord.ui.View):
 
     async def analytics_select_menu_callback(self, select, interaction):
         await interaction.response.defer()
+        await interaction.message.delete()
         
         match select.values[0]:
             # Fetch Player Analytics
@@ -65,7 +67,7 @@ class AnalyticsSelectMenu(discord.ui.View):
                         color=Color.green()
                     )
 
-                    result = convertDataToImage_Player(result[2], embed)
+                    result = convert_data_to_image_player(result[2], embed)
                     
                     if result[0]:
                         await self.ctx.followup.send(embed=result[0], file=result[1])
@@ -85,7 +87,7 @@ class AnalyticsSelectMenu(discord.ui.View):
                         color=Color.green()
                     )
 
-                    result = convertDataToImage_Twitch(result[2], embed)
+                    result = convert_twitch_data_to_image(result[2], embed)
                     
                     if result[0]:
                         await self.ctx.followup.send(embed=result[0], file=result[1])
