@@ -4,18 +4,19 @@ import os
 from config import TOKEN
 
 intents = discord.Intents.default()
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(intents=intents)
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name} ({bot.user.id})')
 
-# Function to load all cogs from the cogs directory
 def load_cogs(bot):
-    cogs_dir = '/cogs'
-    for filename in os.listdir(os.path.dirname(__file__) + cogs_dir):
+    cogs_dir = os.path.dirname(__file__) + '/Commands'
+    
+    for filename in os.listdir(cogs_dir):
         if filename.endswith('.py') and filename != '__init__.py':
-            extension = f'cogs.{filename[:-3]}'
+            extension = f'Commands.{filename[:-3]}'
+            
             try:
                 bot.load_extension(extension)
                 print(f'Successfully loaded extension {extension}')
