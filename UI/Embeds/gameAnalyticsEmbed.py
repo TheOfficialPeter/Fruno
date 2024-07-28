@@ -1,7 +1,7 @@
 import discord
 from discord import Embed, Color
 
-def generate_embed(gameName):
+def generate_embed_players(gameName):
     try:
         embed = Embed(
             title="Player Statistics for " + gameName or " **[Unknown Title]**",

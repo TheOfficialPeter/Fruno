@@ -4,7 +4,7 @@ from Logic.Process.processPlayerAnalytics import process_player_analytics
 
 def fetch_player_stats(gameId):
     if gameId != "":
-        apiResponse = requests.get(f"{ANALYTICS_API_URI+gameId}&type=player")
+        apiResponse = requests.get(f"{ANALYTICS_API_URI+gameId}")
         success, message, apiResponse = process_player_analytics(apiResponse)
 
         if not success:
