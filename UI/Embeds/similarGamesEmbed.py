@@ -17,7 +17,7 @@ def generate_embed_games(ctx, embedData, gameName):
             finalString += f"Tags: {', '.join(similarGame['tags'])}\n"
             finalString += f"Likes: {similarGame['likes']}\n"
             finalString += f"Dislikes: {similarGame['dislikes']}\n"
-            finalString += f"Image: {similarGame['image']}\n"
+            finalString += f"Trailer: {similarGame['trailer']}\n"
 
             embed.add_field(name=f"Game #{similarGameIndex+1}: {similarGame['title']}", value=finalString, inline=False)
                 
