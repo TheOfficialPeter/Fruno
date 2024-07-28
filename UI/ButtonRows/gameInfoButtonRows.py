@@ -1,6 +1,8 @@
 from discord import ui, ButtonStyle
-from UI.Embeds.gameAnalyticsEmbed import generate_embed
+from UI.Embeds.similarGamesEmbed import generate_embed_games
+from UI.Embeds.gameAnalyticsEmbed import generate_embed_players
 from Logic.Fetch.fetchPlayerAnalytics import fetch_player_stats
+from Logic.Fetch.fetchSimilarGames import fetch_similar_games
 from Logic.Display.chartsPlayerAnalytics import convert_data_to_image_player
 
 class embed_buttons_view(ui.View):
@@ -18,12 +20,12 @@ class embed_buttons_view(ui.View):
         success, message, embedData = fetch_player_stats(self.gameId)
 
         if not success:
-            await self.ctx.followup.send(embedData)
+            await self.ctx.followup.send(message)
 
-        success, message, newEmbed = generate_embed(self.gameName)
+        success, message, newEmbed = generate_embed_players(self.gameName)
 
         if not success:
-            await self.ctx.followup.send(newEmbed)
+            await self.ctx.followup.send(message)
 
         success, message, embed, chartsData = convert_data_to_image_player([newEmbed, embedData])
 
@@ -36,4 +38,15 @@ class embed_buttons_view(ui.View):
     @ui.button(label="View Similar Games", style=ButtonStyle.green, emoji="🔗")
     async def similar_games_callback(self, button, interaction):
         await interaction.response.defer()
-        await self.ctx.followup.send("Displaying a list of games that are slighly similar to the one you fetched.")
+
+        success, message, embedData = fetch_similar_games(self.gameName)
+
+        if not success:
+            await self.ctx.followup.send(message)
+
+        success, message, embed = generate_embed_games(self.ctx, embedData)
+
+        if not success:
+            await self.ctx.followup.send(message)
+
+        await self.ctx.followup.send(embed=embed)
