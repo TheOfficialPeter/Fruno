@@ -39,12 +39,12 @@ class embed_buttons_view(ui.View):
     async def similar_games_callback(self, button, interaction):
         await interaction.response.defer()
 
-        success, message, embedData = fetch_similar_games(self.gameName)
+        success, message, embedData = fetch_similar_games(self.gameId)
 
         if not success:
             await self.ctx.followup.send(message)
 
-        success, message, embed = generate_embed_games(self.ctx, embedData)
+        success, message, embed = generate_embed_games(self.ctx, embedData, self.gameName)
 
         if not success:
             await self.ctx.followup.send(message)
