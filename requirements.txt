@@ -1,0 +1,4 @@
+py-cord
+humanize==4.10.0
+matplotlib==3.9.1
+Requests==2.32.3
